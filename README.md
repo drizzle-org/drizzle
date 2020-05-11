@@ -56,6 +56,8 @@ $ mix firmware
 # run the upload script
 $ ./upload.sh drizzle.local ./_build/rpi3/rpi3_dev/nerves/images/drizzle.fw
 ```
+## Wiring Diagram
+![wiring diagram](https://i.imgur.com/Opf0RgV.png)
 
 ## How It Works
 
