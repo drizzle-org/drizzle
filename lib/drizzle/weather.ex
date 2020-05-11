@@ -3,15 +3,8 @@ defmodule Drizzle.Weather do
   This module handles getting the weather forecast.
   """
 
-  @forecast_location Application.get_env(:drizzle, :location, %{
-                       latitude: 39.3898838,
-                       longitude: -104.8287546
-                     })
   @winter_months Application.get_env(:drizzle, :winter_months, [])
-  # TODO: these should have UNITS as context
-  @low_temp 5
-  @high_temp 32
-  @default_temp 10
+  @temp_units Application.get_env(:drizzle, :temp_units, :f)
   @soil_moisture_sensor Application.get_env(:drizzle, :soil_moisture_sensor, nil)
 
   @doc """
@@ -35,24 +28,20 @@ defmodule Drizzle.Weather do
   end
 
   def get_todays_forecast do
-    {:ok, data} =
-      Darkskyx.forecast(
-        Map.get(@forecast_location, :latitude),
-        Map.get(@forecast_location, :longitude),
-        %Darkskyx{
-          exclude: "currently,minutely"
-        }
-      )
-
-    data
-    |> temps_and_precips()
+    Drizzle.ClimaCell.forecast()
     |> Enum.slice(0..23)
     |> Drizzle.WeatherData.update()
   end
 
-  defp temperature_adjustment(low, _high) when low <= @low_temp, do: 0
-  defp temperature_adjustment(_low, high) when high >= @high_temp, do: 1.33
-  defp temperature_adjustment(_low, _high), do: 1
+  defp temperature_adjustment(low, high) do
+    cond do
+      is_nil(low) -> 0
+      is_nil(high) -> 0
+      low <= low_temp() -> 0
+      high >= high_temp() -> 1.33
+      true -> 1
+    end
+  end
 
   defp precipitation_adjustment(prec) when prec >= 1.0, do: 0
   defp precipitation_adjustment(prec) when prec >= 0.5, do: 0.5
@@ -91,24 +80,18 @@ defmodule Drizzle.Weather do
     end
   end
 
-  defp temps_and_precips(data) do
-    Enum.map(data["hourly"]["data"], fn d ->
-      {d["temperature"], d["precipIntensity"], d["precipProbability"]}
-    end)
-  end
-
   # Used when application has just started up
-  defp weather_info([]), do: {@default_temp, @default_temp, 0}
+  defp weather_info([]), do: {nil, nil, 0}
 
   defp weather_info(data) do
     with {cumulative_amount, cumulative_percent} <-
-           Enum.reduce(data, {0, 0}, fn {_, am, pr}, {acc_a, acc_b} ->
+           Enum.reduce(data, {0, 0}, fn {_, am, pr, _}, {acc_a, acc_b} ->
              {acc_a + am, acc_b + pr}
            end),
-         {low, high} <- Enum.min_max_by(data, fn {temp, _, _} -> temp end),
+         {low, high} <- Enum.min_max_by(data, fn {temp, _, _, _} -> temp end),
          rainfall <- cumulative_amount * cumulative_percent do
-      {low_temp, _, _} = low
-      {high_temp, _, _} = high
+      {low_temp, _, _, _} = low
+      {high_temp, _, _, _} = high
       {low_temp, high_temp, rainfall}
     else
       _err -> {:error, "unknown error"}
@@ -132,5 +115,19 @@ defmodule Drizzle.Weather do
     }
 
     Map.get(months_map, num)
+  end
+
+  defp low_temp do
+    case @temp_units do
+      :f -> 32
+      :c -> 0
+    end
+  end
+
+  defp high_temp do
+    case @temp_units do
+      :f -> 90
+      :c -> 32
+    end
   end
 end

@@ -33,7 +33,7 @@ defmodule Drizzle.MixProject do
   def application do
     [
       mod: {Drizzle.Application, []},
-      extra_applications: [:darkskyx, :logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -52,6 +52,8 @@ defmodule Drizzle.MixProject do
     [
       {:circuits_gpio, "~> 0.1"},
       {:darkskyx, "~> 1.0.0"},
+      {:finch, "~> 0.2.0"},
+      {:jason, "~> 1.2.1"},
       {:nerves, "~> 1.6", runtime: false},
       {:poison, "~> 3.0", override: true},
       {:shoehorn, "~> 0.6"},

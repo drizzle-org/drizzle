@@ -11,7 +11,7 @@ config :drizzle,
   location: %{latitude: System.get_env("LATITUDE"), longitude: System.get_env("LONGITUDE")},
   utc_offset: 2,
   winter_months: [:jan, :feb, :nov, :dec],
-  #soil_moisture_sensor: %{pin: 26, min: 0, max: 539},
+  # soil_moisture_sensor: %{pin: 26, min: 0, max: 539},
   # For Waveshare RPi relay board (B variant, 8 relays)
   # https://www.waveshare.com/rpi-relay-board-b.htm
   zone_pins: %{
@@ -27,7 +27,7 @@ config :drizzle,
   # watering times are defined as key {start_time, end_time}
   available_watering_times: %{
     morning: {300, 600}
-    #evening: {2100, 2300}
+    # evening: {2100, 2300}
   },
   # schedule is defined as {zone, watering_time_key, duration_in_minutes}
   schedule: %{
@@ -66,14 +66,11 @@ config :drizzle,
       {:zone7, :morning, 10},
       {:zone5, :morning, 10}
     ]
-  }
-
-config :darkskyx,
-  api_key: System.get_env("DARKSKY_API_KEY"),
-  defaults: [
-    units: "auto",
-    lang: "en"
-  ]
+  },
+  # visit https://developer.climacell.co/ to get an API key
+  climacell_api_key: System.get_env("CLIMACELL_API_KEY"),
+  # expected to be `:f or :c`
+  temp_units: :f
 
 # Customize non-Elixir parts of the firmware.  See
 # https://hexdocs.pm/nerves/advanced-configuration.html for details.
