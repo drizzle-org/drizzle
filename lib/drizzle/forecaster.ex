@@ -14,7 +14,7 @@ defmodule Drizzle.Forecaster do
 
   def handle_info(:work, state) do
     IO.puts("Checking weather forecast")
-    # Get the forecast from Darksky and update the Agent
+    # Get the forecast from API and update the Agent
     Weather.get_todays_forecast()
 
     schedule_work()

@@ -27,7 +27,7 @@ defmodule Drizzle.IO do
   # ======
   def init(_state) do
     IO.puts("Starting Drizzle.IO")
-    IO.inspect Circuits.GPIO.info, label: "Circuits.GPIO"
+    IO.inspect(Circuits.GPIO.info(), label: "Circuits.GPIO")
     # %{zone_name => %{:gpio =>.. , :currstate => true/false}
     state =
       @zone_pins
@@ -43,30 +43,49 @@ defmodule Drizzle.IO do
   end
 
   def handle_cast({:activate, zone}, state) do
-    IO.puts "handle activate #{zone}"
+    IO.puts("handle activate #{zone}")
+
     {:noreply,
-    state |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst}} ->
-      {zone_name, %{
-        gpio: gpio,
-        currstate: cond do
-          zone_name == zone -> :ok = Circuits.GPIO.write(gpio, 0); 1
-          # turn off all zones that are currently active
-          true              -> :ok = Circuits.GPIO.write(gpio, 1); 0
-        end}}
+     state
+     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst}} ->
+       {zone_name,
+        %{
+          gpio: gpio,
+          currstate:
+            cond do
+              zone_name == zone ->
+                :ok = Circuits.GPIO.write(gpio, 0)
+                1
+
+              # turn off all zones that are currently active
+              true ->
+                :ok = Circuits.GPIO.write(gpio, 1)
+                0
+            end
+        }}
      end)}
   end
 
   def handle_cast({:deactivate, zone}, state) do
-    IO.puts "handle deactivate #{zone}"
+    IO.puts("handle deactivate #{zone}")
+
     {:noreply,
-    state |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: cst}} ->
-      {zone_name, %{
-        gpio: gpio,
-        currstate: cond do
-          zone_name == zone -> :ok = Circuits.GPIO.write(gpio, 1); 0
-          true              -> cst
-        end}}
-      end)}
+     state
+     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: cst}} ->
+       {zone_name,
+        %{
+          gpio: gpio,
+          currstate:
+            cond do
+              zone_name == zone ->
+                :ok = Circuits.GPIO.write(gpio, 1)
+                0
+
+              true ->
+                cst
+            end
+        }}
+     end)}
   end
 
   def handle_call({:read_soil_moisture, pin}, _from, state) do
@@ -75,5 +94,4 @@ defmodule Drizzle.IO do
     Circuits.GPIO.close(gpio)
     {:reply, moisture, state}
   end
-
 end

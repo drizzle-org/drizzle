@@ -15,22 +15,20 @@ defmodule Drizzle.Application do
   end
 
   # List all child processes to be supervised
-  def children("host") do
+  def children(:host) do
     [
-      # Starts a worker by calling: Drizzle.Worker.start_link(arg)
-      # {Drizzle.Worker, arg},
+      {Finch, name: DrizzleHTTP}
     ]
   end
 
   def children(target) do
-    IO.puts "===>#{target}<==="
     # start the WiFi wizard if the wireless interface is not configured
     unless "wlan0" in VintageNet.configured_interfaces() do
-      VintageNetWizard.run_wizard
+      VintageNetWizard.run_wizard()
     end
+
     [
-      # Starts a worker by calling: Drizzle.Worker.start_link(arg)
-      # {Drizzle.Worker, arg},
+      {Finch, name: DrizzleHTTP},
       {Drizzle.WeatherData, []},
       {Drizzle.IO, []},
       {Drizzle.Scheduler, %{}},
