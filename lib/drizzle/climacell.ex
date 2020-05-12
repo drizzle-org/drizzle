@@ -60,8 +60,6 @@ defmodule Drizzle.ClimaCell do
     end)
   end
 
-  defp parse_repsonse(_), do: []
-
   defp normalized_temp(%{"temp" => %{"value" => temp}}), do: temp
   defp normalized_precipitation(%{"precipitation" => %{"value" => inches}}), do: inches
 

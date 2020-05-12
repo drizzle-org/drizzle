@@ -26,8 +26,8 @@ config :drizzle,
   },
   # watering times are defined as key {start_time, end_time}
   available_watering_times: %{
-    morning: {300, 600}
-    # evening: {2100, 2300}
+    morning: {300, 600},
+    evening: {2100, 2300}
   },
   # schedule is defined as {zone, watering_time_key, duration_in_minutes}
   schedule: %{

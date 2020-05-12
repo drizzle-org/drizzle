@@ -2,7 +2,7 @@ defmodule Drizzle.MixProject do
   use Mix.Project
 
   @app :drizzle
-  @target System.get_env("MIX_TARGET") || "host"
+  @target System.get_env("MIX_TARGET") || :host
 
   def project do
     [
@@ -62,7 +62,7 @@ defmodule Drizzle.MixProject do
   end
 
   # Specify target specific dependencies
-  defp deps("host"), do: []
+  defp deps(:host), do: []
 
   defp deps(target) do
     [
