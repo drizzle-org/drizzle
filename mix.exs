@@ -43,7 +43,8 @@ defmodule Drizzle.MixProject do
       cookie: "#{@app}_cookie",
       include_erts: &Nerves.Release.erts/0,
       steps: [&Nerves.Release.init/1, :assemble],
-      strip_beams: Mix.env() == :prod
+      strip_beams: Mix.env() == :prod,
+      applications: [drizzle_ui: :load]
     ]
   end
 
@@ -54,10 +55,11 @@ defmodule Drizzle.MixProject do
       {:darkskyx, "~> 1.0.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
+      {:drizzle_ui, path: "drizzle_ui", runtime: false},
       {:nerves, "~> 1.6", runtime: false},
       {:poison, "~> 3.0", override: true},
       {:shoehorn, "~> 0.6"},
-      {:toolshed, "~> 0.2"}
+      {:toolshed, "~> 0.2"},
     ] ++ deps(@target)
   end
 
@@ -70,6 +72,7 @@ defmodule Drizzle.MixProject do
       {:nerves_pack, "~> 0.3.0"},
       {:nerves_firmware_ssh, "~> 0.3"},
       {:nerves_runtime_shell, "~> 0.1.0"},
+      {:ring_logger, "~> 0.8.0"},
       {:vintage_net_wizard, "~> 0.2.3"}
     ] ++ system(target)
   end

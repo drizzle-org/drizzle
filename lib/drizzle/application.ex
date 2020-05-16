@@ -23,8 +23,12 @@ defmodule Drizzle.Application do
 
   def children(target) do
     # start the WiFi wizard if the wireless interface is not configured
-    unless "wlan0" in VintageNet.configured_interfaces() do
-      VintageNetWizard.run_wizard()
+    if "wlan0" in VintageNet.configured_interfaces() do
+      handle_wizard_exit()
+    else
+      # start the WiFi wizard if the wireless interface is not configured
+      IO.puts "===> Running VintageNetWizard <==="
+      VintageNetWizard.run_wizard(on_exit: {__MODULE__, :handle_wizard_exit, []})
     end
 
     [
@@ -35,5 +39,19 @@ defmodule Drizzle.Application do
       {Drizzle.Forecaster, %{}},
       {Drizzle.TodaysEvents, []}
     ]
+  end
+
+  def handle_wizard_exit() do
+    VintageNet.subscribe(["interface", "wlan0"])
+    receive do
+      {VintageNet, ["interface", ifname, "connection"], _oldstate, :internet, _} ->
+        IO.puts "===> #{ifname} configured, status: #{inspect status} <==="
+        Application.ensure_all_started(:drizzle_ui)
+      _ -> loop
+    end
+  end
+
+  defp wifi_check_wizard
+    "wlan0" in VintageNet.all_interfaces()
   end
 end

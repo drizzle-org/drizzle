@@ -1,5 +1,17 @@
 use Mix.Config
 
+# Add the RingLogger backend. This removes the
+# default :console backend.
+config :logger, backends: [RingLogger]
+
+# Set the number of messages to hold in the circular buffer
+config :logger, RingLogger, max_size: 8192
+
+config :ring_logger,
+  application_levels: %{drizzle_ui: :debug},
+  color: [debug: :yellow],
+  level: :debug
+
 # Authorize the device to receive firmware using your public key.
 # See https://hexdocs.pm/nerves_firmware_ssh/readme.html for more information
 # on configuring nerves_firmware_ssh.
