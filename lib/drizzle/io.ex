@@ -22,6 +22,10 @@ defmodule Drizzle.IO do
     GenServer.call(DrizzleIO, {:read_soil_moisture, pin})
   end
 
+  def zonestate() do
+    GenServer.call(DrizzleIO, {:zonestate})
+  end
+
   # ======
   # Server
   # ======
@@ -94,4 +98,9 @@ defmodule Drizzle.IO do
     Circuits.GPIO.close(gpio)
     {:reply, moisture, state}
   end
+
+  def handle_call({:zonestate}, _from, state) do
+    {:reply, state, state}
+  end
+
 end

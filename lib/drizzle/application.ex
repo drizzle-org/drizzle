@@ -40,6 +40,7 @@ defmodule Drizzle.Application do
       {VintageNet, ["interface", ifname, "connection"], _oldstate, :internet, _} ->
         IO.puts "===> #{ifname} configured <==="
         start_phoenix()
+      _ -> wait_for_internet(iface)
     end
   end
 

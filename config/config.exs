@@ -70,7 +70,7 @@ config :drizzle,
   # visit https://developer.climacell.co/ to get an API key
   climacell_api_key: System.get_env("CLIMACELL_API_KEY"),
   # expected to be `:f or :c`
-  temp_units: :f
+  temp_units: :c
 
 # Customize non-Elixir parts of the firmware.  See
 # https://hexdocs.pm/nerves/advanced-configuration.html for details.

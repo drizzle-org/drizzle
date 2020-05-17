@@ -1,6 +1,13 @@
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace-of-mind from prototype to production</p>
+  <h2>Zone states:</h2>
+  <ul>
+    <%= for {zonename, zonedata} <- @zones do %>
+    <li><%= zonename %>: <%= zonedata.currstate %></li>
+    <% end %>
+  </ul>
+
+  <h2>Todays events:</h2>
+    <%= inspect Drizzle.TodaysEvents.current_state %>
 
   <form phx-change="suggest" phx-submit="search">
     <input type="text" name="q" value="<%= @query %>" placeholder="Live dependency search" list="results" autocomplete="off"/>

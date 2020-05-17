@@ -3,11 +3,15 @@ defmodule DrizzleUiWeb.PageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, query: "", results: %{})}
+    IO.puts "PageLive.mount"
+    zones = Drizzle.IO.zonestate()
+    IO.inspect zones
+    {:ok, assign(socket, query: "", results: %{}, zones: zones)}
   end
 
   @impl true
   def handle_event("suggest", %{"q" => query}, socket) do
+    IO.puts "PageLive.handle_event"
     {:noreply, assign(socket, results: search(query), query: query)}
   end
 
@@ -26,9 +30,9 @@ defmodule DrizzleUiWeb.PageLive do
   end
 
   defp search(query) do
-    if not DrizzleUiWeb.Endpoint.config(:code_reloader) do
-      raise "action disabled when not in development"
-    end
+    #if not DrizzleUiWeb.Endpoint.config(:code_reloader) do
+    #  raise "action disabled when not in development"
+    #end
 
     for {app, desc, vsn} <- Application.started_applications(),
         app = to_string(app),
