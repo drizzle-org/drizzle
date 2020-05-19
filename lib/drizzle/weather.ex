@@ -6,7 +6,7 @@ defmodule Drizzle.Weather do
   @winter_months Application.get_env(:drizzle, :winter_months, [])
   @temp_units Application.get_env(:drizzle, :temp_units, :f)
   @soil_moisture_sensor Application.get_env(:drizzle, :soil_moisture_sensor, nil)
-  @default_adapter Drizzle.ClimaCell
+  @default_adapter Drizzle.WeatherAdapter.ClimaCell
 
   @doc """
   weather_adjustment_factor/0 determines adjustments to make to watering time

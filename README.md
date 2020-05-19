@@ -16,7 +16,7 @@ For the system to work properly, you need to export some ENV variables. For weat
 - `LATITUDE=<your local latitude>`
 - `LONGITUDE=<your local longitude>`
 
-### Weather Adapters
+## Weather Adapters
 
 By default, Drizzle uses [ClimaCell weather API](https://www.climacell.co/weather-api/pricing/) to fetch weather forecasts
 which requires setting an API key in your environment when compiling.
