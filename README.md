@@ -45,6 +45,18 @@ The Nerves.Runtime.Helpers have been removed. Use https://hex.pm/packages/toolsh
 iex(1)> 
 ```
 
+## Web interface
+(Work in progress) Drizzle has its own user interface based on Phoenix. Once you get the network setup complete, you should be able to navigate to 
+http://drizzle.local and get a basic web page that allows you to:
+- Manually control the zones
+- View a list of today's scheduled irrigation events
+
+Things on the backlog for the UI are currently:
+- Dynamic schedule (change your watering schedule via the UI)
+- Dynamic configuration (set your weather provider details, API keys etc)
+- Ability to select from preset hardware GPIO pin layouts for your board
+
+
 ## OTA firmware upgrades
 
 Once you've pinged it succesfully you can leverage nerves_firmware_ssh mechanism to do OTA (over-the-air) firmware upgrades (so that you don't need to swap the microSD card in and out from your RPi), as follows:
@@ -79,18 +91,17 @@ information about targets see:
 
 https://hexdocs.pm/nerves/targets.html#content
 
-## Testing
+## Local testing in your host environment
 Getting Circuits.GPIO to work in stub mode is tricky, as it needs recompilation. You only need to recompile when you switch mix targets though:
 ```sh
 $ rm -rf _build/
-$ MIX_ENV="test" MIX_TARGET="host" CIRCUITS_MIX_ENV="test" mix test
-...
+$ MIX_ENV="test" CIRCUITS_MIX_ENV="test" iex -S mix phx.server
 ```
 
-when done with testing, clean all build artifacts and recompile:
+when done with testing, clean all build artifacts, recompile and flash over the network:
 ```sh
 $ rm -rf _build/
-$ MIX_TARGET="rpi3" mix firmware
+$ MIX_TARGET="rpi3" mix firmware && ./upload.sh drizzle.local /home/ekarak/github/drizzle-org/drizzle/_build/rpi3/rpi3_dev/nerves/images/drizzle.fw 
 ```
 
 ## Getting Started

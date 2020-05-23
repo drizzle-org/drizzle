@@ -89,8 +89,6 @@ config :nerves_pack,
 #import Phoenix config
 # Configures the endpoint
 config :drizzle_ui, DrizzleUiWeb.Endpoint,
-  url: [host: "drizzle.local", port: 80],
-  http: [ip: {0, 0, 0, 0}, port: 80],
   # Use compile-time Mix config instead of runtime environment variables
   load_from_system_env: false,
   # Start the server since we're running in a release instead of through `mix`
@@ -99,7 +97,7 @@ config :drizzle_ui, DrizzleUiWeb.Endpoint,
   code_reloader: false,
   secret_key_base: "R6vmyPo7uGwXniRcOCsspyeoBjoh1RdJl9HGu+taCfhhSfAdd3BwVrT5kIqfmk2w",
   render_errors: [view: DrizzleUiWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: DrizzleUi.PubSub,
+  pubsub_server: :drizzle_pubsub,
   live_view: [signing_salt: "c2+eUgj3"]
 
 

@@ -2,6 +2,7 @@ defmodule Drizzle.IO do
   use GenServer
 
   @zone_pins Application.get_env(:drizzle, :zone_pins, %{})
+  @topic "drizzle"
 
   # ======
   # Client
@@ -23,7 +24,7 @@ defmodule Drizzle.IO do
   end
 
   def zonestate() do
-    GenServer.call(DrizzleIO, {:zonestate})
+    GenServer.call(DrizzleIO, :zonestate)
   end
 
   # ======
@@ -52,22 +53,26 @@ defmodule Drizzle.IO do
     {:noreply,
      state
      |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst}} ->
+
        {zone_name,
         %{
           gpio: gpio,
           currstate:
             cond do
               zone_name == zone ->
+
+                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 1}
                 :ok = Circuits.GPIO.write(gpio, 0)
-                1
 
               # turn off all zones that are currently active
               true ->
+                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 0}
                 :ok = Circuits.GPIO.write(gpio, 1)
                 0
             end
         }}
      end)}
+
   end
 
   def handle_cast({:deactivate, zone}, state) do
@@ -76,12 +81,15 @@ defmodule Drizzle.IO do
     {:noreply,
      state
      |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: cst}} ->
+
        {zone_name,
         %{
           gpio: gpio,
           currstate:
             cond do
               zone_name == zone ->
+                #Phoenix.PubSub.broadcast :drizzle_pubsub, @topic, %{topic: zone, payload: 0}
+                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 0}
                 :ok = Circuits.GPIO.write(gpio, 1)
                 0
 
@@ -99,7 +107,7 @@ defmodule Drizzle.IO do
     {:reply, moisture, state}
   end
 
-  def handle_call({:zonestate}, _from, state) do
+  def handle_call(:zonestate, _from, state) do
     {:reply, state, state}
   end
 

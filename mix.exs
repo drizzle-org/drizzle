@@ -44,7 +44,8 @@ defmodule Drizzle.MixProject do
       include_erts: &Nerves.Release.erts/0,
       steps: [&Nerves.Release.init/1, :assemble],
       strip_beams: Mix.env() == :prod,
-      applications: [drizzle_ui: :load]
+      #applications: [:drizzle_ui]
+      #applications: [drizzle_ui: :load]
     ]
   end
 
@@ -55,7 +56,8 @@ defmodule Drizzle.MixProject do
       {:darkskyx, "~> 1.0.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
-      {:drizzle_ui, path: "drizzle_ui", runtime: false},
+      #{:drizzle_ui, path: "drizzle_ui", runtime: false},
+      {:drizzle_ui, path: "drizzle_ui"},
       {:nerves, "~> 1.6", runtime: false},
       {:poison, "~> 3.0", override: true},
       {:shoehorn, "~> 0.6"},

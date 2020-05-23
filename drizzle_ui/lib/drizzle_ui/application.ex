@@ -10,7 +10,7 @@ defmodule DrizzleUi.Application do
       # Start the Telemetry supervisor
       DrizzleUiWeb.Telemetry,
       # Start the PubSub system
-      {Phoenix.PubSub, name: DrizzleUi.PubSub},
+      {Phoenix.PubSub, [name: :drizzle_pubsub, adapter: Phoenix.PubSub.PG2]},
       # Start the Endpoint (http/https)
       DrizzleUiWeb.Endpoint
       # Start a worker by calling: DrizzleUi.Worker.start_link(arg)
