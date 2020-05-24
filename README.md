@@ -15,9 +15,22 @@ months where the system will not run regardless of temperature.
 For the system to work properly, you need to export some ENV variables. For weather forecasts, set the following:
 - `LATITUDE=<your local latitude>`
 - `LONGITUDE=<your local longitude>`
-- `DARKSKY_API_KEY=<your 32 character API key>`
-_Weather forecasts are retrieved from Dark Sky. You can get a free API key at:
-[https://darksky.net/dev](https://darksky.net/dev)._
+
+## Weather Adapters
+
+By default, Drizzle uses [ClimaCell weather API](https://www.climacell.co/weather-api/pricing/) to fetch weather forecasts
+which requires setting an API key in your environment when compiling.
+- `CLIMACELL_API_KEY=<your API key>`
+
+If you wish to use a different weather API service, you can implement the `Drizzle.WeatherAdapter`
+behavior in another module and set it in your application config:
+
+```elixir
+config :drizzle, weather_adapter: MyCustomAdapter
+```
+
+If this is a common weather API that could be useful to others, please consider contributing back to
+this library and opening a PR supporting it.
 
 ## First boot
 When your device starts up *for its first time* it will need to know the SSID and passphrase (aka PSK, pre-shared key) for the wireless SSID its going to connect to (for weather updates for example). This process is done using the [VintageNetWizard](https://hexdocs.pm/vintage_net_wizard/readme.html), so this means you have to temporarily connect your mobile or laptop to the wireless access point named "nerves_xxxxx" (where xxxxx is an automatically generated ID for your nerves machine) and access a basic web portal to select your home network and provide its password. 

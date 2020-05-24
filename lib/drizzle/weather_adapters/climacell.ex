@@ -1,7 +1,9 @@
-defmodule Drizzle.ClimaCell do
+defmodule Drizzle.WeatherAdapter.ClimaCell do
   @moduledoc """
   Interface for the ClimaCell API
   """
+  @behaviour Drizzle.WeatherAdapter
+
   alias Drizzle.HTTP
 
   @api_key Application.get_env(:drizzle, :climacell_api_key)
