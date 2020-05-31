@@ -47,57 +47,25 @@ defmodule Drizzle.IO do
     %{gpio: gpio, currstate: 0}
   end
 
+  defp do_status_change(zone_name, zonestruct, newstate) do
+    intstate = (newstate && 1 || 0)
+    DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: intstate}
+    :ok = Circuits.GPIO.write(zonestruct.gpio, (!newstate && 1 || 0))
+    intstate
+  end
+
   def handle_cast({:activate, zone}, state) do
-    IO.puts("handle activate #{zone}")
-
     {:noreply,
+    # activate this zone, but turn off all other zones
      state
-     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst}} ->
-
-       {zone_name,
-        %{
-          gpio: gpio,
-          currstate:
-            cond do
-              zone_name == zone ->
-
-                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 1}
-                :ok = Circuits.GPIO.write(gpio, 0)
-
-              # turn off all zones that are currently active
-              true ->
-                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 0}
-                :ok = Circuits.GPIO.write(gpio, 1)
-                0
-            end
-        }}
+     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} ->
+       {zone_name, %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }}
      end)}
-
   end
 
   def handle_cast({:deactivate, zone}, state) do
-    IO.puts("handle deactivate #{zone}")
-
     {:noreply,
-     state
-     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: cst}} ->
-
-       {zone_name,
-        %{
-          gpio: gpio,
-          currstate:
-            cond do
-              zone_name == zone ->
-                #Phoenix.PubSub.broadcast :drizzle_pubsub, @topic, %{topic: zone, payload: 0}
-                DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: 0}
-                :ok = Circuits.GPIO.write(gpio, 1)
-                0
-
-              true ->
-                cst
-            end
-        }}
-     end)}
+     Map.put(state, zone, do_status_change(zone, state[zone], false))}
   end
 
   def handle_call({:read_soil_moisture, pin}, _from, state) do

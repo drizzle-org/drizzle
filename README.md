@@ -101,7 +101,7 @@ $ MIX_ENV="test" CIRCUITS_MIX_ENV="test" iex -S mix phx.server
 when done with testing, clean all build artifacts, recompile and flash over the network:
 ```sh
 $ rm -rf _build/
-$ MIX_TARGET="rpi3" mix firmware && ./upload.sh drizzle.local /home/ekarak/github/drizzle-org/drizzle/_build/rpi3/rpi3_dev/nerves/images/drizzle.fw 
+$ MIX_TARGET="rpi3" mix firmware && ./upload.sh drizzle.local _build/rpi3/rpi3_dev/nerves/images/drizzle.fw 
 ```
 
 ## Getting Started
