@@ -70,7 +70,7 @@ config :drizzle,
   # visit https://developer.climacell.co/ to get an API key
   climacell_api_key: System.get_env("CLIMACELL_API_KEY"),
   # expected to be `:f or :c`
-  temp_units: :f
+  temp_units: :c
 
 # Customize non-Elixir parts of the firmware.  See
 # https://hexdocs.pm/nerves/advanced-configuration.html for details.
@@ -85,6 +85,24 @@ config :shoehorn,
 
 config :nerves_pack,
   host: [:hostname, "drizzle"]
+
+#import Phoenix config
+# Configures the endpoint
+config :drizzle_ui, DrizzleUiWeb.Endpoint,
+  # Use compile-time Mix config instead of runtime environment variables
+  load_from_system_env: false,
+  # Start the server since we're running in a release instead of through `mix`
+  server: true,
+  # Nerves root filesystem is read-only, so disable the code reloader
+  code_reloader: false,
+  secret_key_base: "R6vmyPo7uGwXniRcOCsspyeoBjoh1RdJl9HGu+taCfhhSfAdd3BwVrT5kIqfmk2w",
+  render_errors: [view: DrizzleUiWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: :drizzle_pubsub,
+  live_view: [signing_salt: "c2+eUgj3"]
+
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
 
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

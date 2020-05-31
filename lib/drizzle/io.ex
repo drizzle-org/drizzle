@@ -2,6 +2,7 @@ defmodule Drizzle.IO do
   use GenServer
 
   @zone_pins Application.get_env(:drizzle, :zone_pins, %{})
+  @topic "drizzle"
 
   # ======
   # Client
@@ -22,6 +23,10 @@ defmodule Drizzle.IO do
     GenServer.call(DrizzleIO, {:read_soil_moisture, pin})
   end
 
+  def zonestate() do
+    GenServer.call(DrizzleIO, :zonestate)
+  end
+
   # ======
   # Server
   # ======
@@ -39,53 +44,34 @@ defmodule Drizzle.IO do
   defp init_output(pin) do
     {:ok, gpio} = Circuits.GPIO.open(pin, :output)
     :ok = Circuits.GPIO.write(gpio, 1)
-    %{gpio: gpio, currstate: 0}
+    %{gpio: gpio, currstate: false}
+  end
+
+  # map falsey values to a 0 or 1, as needed by Circuits.GPIO NIF
+  defp intstate(state) when state in [false, nil], do: 0
+  defp intstate(_state), do: 1
+
+  defp do_status_change(zone_name, zonestruct, desiredstate) do
+    DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: desiredstate}
+    # GPIO.write(0) actually turns ON the relay on the Waveshare RPi 8x relay board
+    # this has to do with pull-up or down resitors, we might need to make this configurable
+    :ok = Circuits.GPIO.write(zonestruct.gpio, intstate(!desiredstate))
+    desiredstate
   end
 
   def handle_cast({:activate, zone}, state) do
-    IO.puts("handle activate #{zone}")
-
     {:noreply,
-     state
-     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst}} ->
-       {zone_name,
-        %{
-          gpio: gpio,
-          currstate:
-            cond do
-              zone_name == zone ->
-                :ok = Circuits.GPIO.write(gpio, 0)
-                1
-
-              # turn off all zones that are currently active
-              true ->
-                :ok = Circuits.GPIO.write(gpio, 1)
-                0
-            end
-        }}
+      Enum.map(state, fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} -> {
+        zone_name,
+        # activate this zone, but turn off all other zones
+        %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }
+      }
      end)}
   end
 
   def handle_cast({:deactivate, zone}, state) do
-    IO.puts("handle deactivate #{zone}")
-
     {:noreply,
-     state
-     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: cst}} ->
-       {zone_name,
-        %{
-          gpio: gpio,
-          currstate:
-            cond do
-              zone_name == zone ->
-                :ok = Circuits.GPIO.write(gpio, 1)
-                0
-
-              true ->
-                cst
-            end
-        }}
-     end)}
+     Map.put(state, zone, do_status_change(zone, state[zone], false))}
   end
 
   def handle_call({:read_soil_moisture, pin}, _from, state) do
@@ -94,4 +80,9 @@ defmodule Drizzle.IO do
     Circuits.GPIO.close(gpio)
     {:reply, moisture, state}
   end
+
+  def handle_call(:zonestate, _from, state) do
+    {:reply, state, state}
+  end
+
 end

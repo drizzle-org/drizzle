@@ -1,5 +1,17 @@
 use Mix.Config
 
+# Add the RingLogger backend. This removes the
+# default :console backend.
+config :logger, backends: [RingLogger]
+
+# Set the number of messages to hold in the circular buffer
+config :logger, RingLogger, max_size: 8192
+
+config :ring_logger,
+  #application_levels: %{drizzle_ui: :debug},
+  color: [debug: :yellow],
+  level: :debug
+
 # Authorize the device to receive firmware using your public key.
 # See https://hexdocs.pm/nerves_firmware_ssh/readme.html for more information
 # on configuring nerves_firmware_ssh.
@@ -25,7 +37,14 @@ config :nerves_firmware_ssh,
 
 # GPIO pin 2 is directly next to 3.3V so adding a jumper over them for
 # 5 seconds should suffice to get the vintage_wifi_wizard up and running
-config :vintage_net_wizard, gpio_pin: 2
+config :vintage_net_wizard,
+  gpio_pin: 2,
+  port: 81
+
+  # Configures the endpoint
+config :drizzle_ui, DrizzleUiWeb.Endpoint,
+  url: [host: "drizzle.local", port: 80],
+  http: [ip: {0, 0, 0, 0}, port: 80]
 
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

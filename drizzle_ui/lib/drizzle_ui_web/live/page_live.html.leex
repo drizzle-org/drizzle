@@ -1,0 +1,17 @@
+<section class="phx-hero">
+  <h2>Zone states:</h2>
+  <ul>
+    <%= for {zonename, zonedata} <- @zones do %>
+      <%  btnCmd = if(zonedata.currstate, do: "Deactivate", else: "Activate") %>
+      <button
+        phx-click="manual zone control"
+        phx-value-cmd="<%= String.downcase(btnCmd) %>"
+        phx-value-zone="<%= zonename %>"
+      ><%= btnCmd %> <%= zonename %></button>
+    <% end %>
+  </ul>
+
+  <h2>Todays events:</h2>
+    <%= inspect Drizzle.TodaysEvents.current_state %>
+
+</section>
