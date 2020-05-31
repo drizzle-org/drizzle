@@ -61,8 +61,7 @@ defmodule Drizzle.IO do
 
   def handle_cast({:activate, zone}, state) do
     {:noreply,
-    state
-    |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} -> {
+      Enum.map(state, fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} -> {
         zone_name,
         # activate this zone, but turn off all other zones
         %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }
