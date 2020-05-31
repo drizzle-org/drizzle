@@ -2,7 +2,7 @@
   <h2>Zone states:</h2>
   <ul>
     <%= for {zonename, zonedata} <- @zones do %>
-      <%  btnCmd = if(zonedata.currstate == 0, do: "Activate", else: "Deactivate") %>
+      <%  btnCmd = if(zonedata.currstate, do: "Deactivate", else: "Activate") %>
       <button
         phx-click="manual zone control"
         phx-value-cmd="<%= String.downcase(btnCmd) %>"

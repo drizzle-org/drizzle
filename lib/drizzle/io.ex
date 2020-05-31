@@ -44,22 +44,29 @@ defmodule Drizzle.IO do
   defp init_output(pin) do
     {:ok, gpio} = Circuits.GPIO.open(pin, :output)
     :ok = Circuits.GPIO.write(gpio, 1)
-    %{gpio: gpio, currstate: 0}
+    %{gpio: gpio, currstate: false}
   end
 
-  defp do_status_change(zone_name, zonestruct, newstate) do
-    intstate = (newstate && 1 || 0)
-    DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: intstate}
-    :ok = Circuits.GPIO.write(zonestruct.gpio, (!newstate && 1 || 0))
-    intstate
+  # map falsey values to a 0 or 1, as needed by Circuits.GPIO NIF
+  defp intstate(state) when state in [false, nil], do: 0
+  defp intstate(_state), do: 1
+
+  defp do_status_change(zone_name, zonestruct, desiredstate) do
+    DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: desiredstate}
+    # GPIO.write(0) actually turns ON the relay on the Waveshare RPi 8x relay board
+    # this has to do with pull-up or down resitors, we might need to make this configurable
+    :ok = Circuits.GPIO.write(zonestruct.gpio, intstate(!desiredstate))
+    desiredstate
   end
 
   def handle_cast({:activate, zone}, state) do
     {:noreply,
-    # activate this zone, but turn off all other zones
-     state
-     |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} ->
-       {zone_name, %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }}
+    state
+    |> Enum.map(fn {zone_name, %{gpio: gpio, currstate: _cst} = zonestruct} -> {
+        zone_name,
+        # activate this zone, but turn off all other zones
+        %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }
+      }
      end)}
   end
 
