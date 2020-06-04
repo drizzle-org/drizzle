@@ -1,11 +1,15 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-use Mix.Config
+import Config
 
-import_config "#{Mix.Project.config()[:target]}.exs"
+config :drizzle, target: Mix.target()
+
+# Customize non-Elixir parts of the firmware.  See
+# https://hexdocs.pm/nerves/advanced-configuration.html for details.
+config :nerves, :firmware, rootfs_overlay: "rootfs_overlay"
+
+# Set the SOURCE_DATE_EPOCH date for reproducible builds.
+# See https://reproducible-builds.org/docs/source-date-epoch/ for more information
+
+config :nerves, source_date_epoch: "1591293559"
 
 config :drizzle,
   location: %{latitude: System.get_env("LATITUDE"), longitude: System.get_env("LONGITUDE")},
@@ -29,64 +33,12 @@ config :drizzle,
     morning: {300, 600},
     evening: {2100, 2300}
   },
-  # schedule is defined as {zone, watering_time_key, duration_in_minutes}
-  schedule: %{
-    sun: [
-      {:zone4, :morning, 20},
-      {:zone5, :morning, 20},
-      {:zone6, :morning, 20},
-      {:zone7, :morning, 10}
-    ],
-    mon: [
-      {:zone1, :morning, 20},
-      {:zone3, :morning, 20}
-    ],
-    tue: [
-      {:zone4, :morning, 20},
-      {:zone5, :morning, 20},
-      {:zone6, :morning, 20},
-      {:zone7, :morning, 10}
-    ],
-    wed: [
-      {:zone1, :morning, 20},
-      {:zone3, :morning, 20}
-    ],
-    thu: [
-      {:zone4, :morning, 20},
-      {:zone5, :morning, 20},
-      {:zone6, :morning, 20},
-      {:zone7, :morning, 10}
-    ],
-    fri: [
-      {:zone1, :morning, 20},
-      {:zone3, :morning, 20},
-      {:zone5, :evening, 10}
-    ],
-    sat: [
-      {:zone7, :morning, 10},
-      {:zone5, :morning, 10}
-    ]
-  },
   # visit https://developer.climacell.co/ to get an API key
   climacell_api_key: System.get_env("CLIMACELL_API_KEY"),
   # expected to be `:f or :c`
   temp_units: :c
 
-# Customize non-Elixir parts of the firmware.  See
-# https://hexdocs.pm/nerves/advanced-configuration.html for details.
-config :nerves, :firmware, rootfs_overlay: "rootfs_overlay"
-
-# Use shoehorn to start the main application. See the shoehorn
-# docs for separating out critical OTP applications such as those
-# involved with firmware updates.
-config :shoehorn,
-  init: [:nerves_runtime, :nerves_pack],
-  app: Mix.Project.config()[:app]
-
-config :nerves_pack,
-  host: [:hostname, "drizzle"]
-
-#import Phoenix config
+# import Phoenix config
 # Configures the endpoint
 config :drizzle_ui, DrizzleUiWeb.Endpoint,
   # Use compile-time Mix config instead of runtime environment variables
@@ -100,12 +52,14 @@ config :drizzle_ui, DrizzleUiWeb.Endpoint,
   pubsub_server: :drizzle_pubsub,
   live_view: [signing_salt: "c2+eUgj3"]
 
-
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-# Uncomment to use target specific configurations
 
-# import_config "#{Mix.Project.config[:target]}.exs"
+if Mix.target() == :host do
+  import_config "host.exs"
+else
+  import_config "target.exs"
+end
