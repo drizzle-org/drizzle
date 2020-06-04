@@ -53,6 +53,7 @@ defmodule Drizzle.MixProject do
   defp deps do
     [
       {:circuits_gpio, "~> 0.1"},
+      {:cubdb, "~> 1.0.0-rc.3"},
       {:darkskyx, "~> 1.0.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},

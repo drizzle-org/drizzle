@@ -12,8 +12,10 @@ defmodule Drizzle.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Drizzle.Supervisor]
+
     Supervisor.start_link(children(@target) ++ [
       {Finch, name: DrizzleHTTP},
+      Drizzle.Schedule,
       {Drizzle.WeatherData, []},
       {Drizzle.IO, []},
       {Drizzle.Scheduler, %{}},

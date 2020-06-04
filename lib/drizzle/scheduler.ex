@@ -1,9 +1,8 @@
 defmodule Drizzle.Scheduler do
   use GenServer
 
-  alias Drizzle.TodaysEvents
+  alias Drizzle.{Schedule, TodaysEvents}
 
-  @schedule Application.get_env(:drizzle, :schedule, %{})
   @days_as_atoms {:zero, :sun, :mon, :tue, :wed, :thu, :fri, :sat}
   @utc_offset Application.get_env(:drizzle, :utc_offset, 0)
 
@@ -49,7 +48,10 @@ defmodule Drizzle.Scheduler do
   defp execute_scheduled_events do
     if current_time() == 0 || TodaysEvents.current_state() == [] do
       TodaysEvents.reset()
-      TodaysEvents.update(Map.get(@schedule, current_day_of_week()))
+
+      current_day_of_week()
+      |> Schedule.get()
+      |> TodaysEvents.update()
     end
 
     case Enum.find(TodaysEvents.current_state(), fn {time, _a, _z} ->
