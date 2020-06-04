@@ -54,13 +54,11 @@ defmodule Drizzle.MixProject do
     [
       {:circuits_gpio, "~> 0.1"},
       {:cubdb, "~> 1.0.0-rc.3"},
-      {:darkskyx, "~> 1.0.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
       #{:drizzle_ui, path: "drizzle_ui", runtime: false},
       {:drizzle_ui, path: "drizzle_ui"},
       {:nerves, "~> 1.6", runtime: false},
-      {:poison, "~> 3.0", override: true},
       {:shoehorn, "~> 0.6"},
       {:toolshed, "~> 0.2"},
     ] ++ deps(@target)
