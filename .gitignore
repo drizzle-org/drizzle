@@ -21,3 +21,5 @@ erl_crash.dump
 
 # Elixir language server files
 .elixir_ls
+
+tmp
