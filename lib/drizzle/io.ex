@@ -71,7 +71,8 @@ defmodule Drizzle.IO do
 
   def handle_cast({:deactivate, zone}, state) do
     {:noreply,
-     Map.put(state, zone, do_status_change(zone, state[zone], false))}
+      put_in(state, [zone, :currstate], do_status_change(zone, state[zone], false))
+    }
   end
 
   def handle_call({:read_soil_moisture, pin}, _from, state) do
