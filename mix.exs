@@ -66,8 +66,8 @@ defmodule Drizzle.MixProject do
       {:ecto, "~> 3.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
-      #{:drizzle_ui, path: "drizzle_ui", runtime: false},
-      # {:drizzle_ui, path: "drizzle_ui"},
+      {:drizzle_ui, path: "drizzle_ui"},
+
       {:nerves, "~> 1.6", runtime: false},
       {:shoehorn, "~> 0.6"},
       {:toolshed, "~> 0.2"},
