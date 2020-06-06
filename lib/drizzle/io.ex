@@ -66,7 +66,8 @@ defmodule Drizzle.IO do
         # activate this zone, but turn off all other zones
         %{gpio: gpio, currstate: do_status_change(zone_name, zonestruct, zone_name == zone) }
       }
-     end)}
+     end) |> Enum.into(%{})
+    }
   end
 
   def handle_cast({:deactivate, zone}, state) do
