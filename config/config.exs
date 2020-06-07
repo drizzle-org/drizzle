@@ -12,9 +12,6 @@ config :nerves, :firmware, rootfs_overlay: "rootfs_overlay"
 config :nerves, source_date_epoch: "1591293559"
 
 config :drizzle,
-  location: %{latitude: System.get_env("LATITUDE"), longitude: System.get_env("LONGITUDE")},
-  utc_offset: 2,
-  winter_months: [:jan, :feb, :nov, :dec],
   # soil_moisture_sensor: %{pin: 26, min: 0, max: 539},
   # For Waveshare RPi relay board (B variant, 8 relays)
   # https://www.waveshare.com/rpi-relay-board-b.htm
@@ -28,15 +25,8 @@ config :drizzle,
     zone7: 21,
     zone8: 26
   },
-  # watering times are defined as key {start_time, end_time}
-  available_watering_times: %{
-    morning: {300, 600},
-    evening: {2100, 2300}
-  },
   # visit https://developer.climacell.co/ to get an API key
-  climacell_api_key: System.get_env("CLIMACELL_API_KEY"),
-  # expected to be `:f or :c`
-  temp_units: :c
+  climacell_api_key: System.get_env("CLIMACELL_API_KEY")
 
 # import Phoenix config
 # Configures the endpoint
@@ -50,7 +40,8 @@ config :drizzle_ui, DrizzleUiWeb.Endpoint,
   secret_key_base: "R6vmyPo7uGwXniRcOCsspyeoBjoh1RdJl9HGu+taCfhhSfAdd3BwVrT5kIqfmk2w",
   render_errors: [view: DrizzleUiWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: :drizzle_pubsub,
-  live_view: [signing_salt: "c2+eUgj3"]
+  live_view: [signing_salt: "c2+eUgj3"],
+  check_origin: false
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

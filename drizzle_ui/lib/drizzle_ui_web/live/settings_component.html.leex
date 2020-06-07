@@ -1,0 +1,43 @@
+<a href="#" phx-click="import_config" phx-target="<%= @myself %>">Import Config</a>
+<%= f = form_for @changeset, "#",
+  id: "settings-form",
+  phx_target: @myself,
+  phx_change: "validate",
+  phx_submit: "save" %>
+
+  <%= label f, :latitude %>
+  <%= text_input f, :latitude %>
+  <%= error_tag f, :latitude %>
+
+  <%= label f, :longitude %>
+  <%= text_input f, :longitude %>
+  <%= error_tag f, :longitude %>
+
+  <%= label f, :utc_offset %>
+  <%= text_input f, :utc_offset %>
+  <%= error_tag f, :utc_offset %>
+
+  <%= label f, :temp_units %>
+  <%= select f, :temp_units, ["Fº": :f, "Cº": :c] %>
+  <%= error_tag f, :temp_units %>
+
+  <%= label f, :winter_months %>
+  <%= for {month, val} <- Drizzle.Types.Month.__options__() do %>
+    <input type="checkbox" name="settings[winter_months][]" id="settings_winter_months_<%= val %>" value="<%= val %>" <%= if has_month?(val, @changeset), do: "checked" %>>
+    <%= humanize(month) %>
+  <% end %>
+  <%= error_tag f, :winter_months %>
+
+  <%= label f, "Morning Watering Range" %>
+  <%= for {key, val} <- watering_times(:morning, @changeset) do %>
+    <%= humanize(key)%> Time : <%= time_select f, :morning, name: "settings[morning][#{key}]", value: val %>
+  <% end %>
+  <%= error_tag f, :morning %>
+  <%= label f, "Evening Watering Range" %>
+  <%= for {key, val} <- watering_times(:evening, @changeset) do %>
+    <%= humanize(key)%> Time : <%= time_select f, :evening, name: "settings[evening][#{key}]", value: val %>
+  <% end %>
+  <%= error_tag f, :evening %>
+  </br>
+  <%= submit "Save", phx_disable_with: "Saving..." %>
+</form>
