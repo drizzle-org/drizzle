@@ -100,7 +100,7 @@ config :vintage_net_wizard,
   port: 81
 
 # Configures the endpoint
-config :drizzle_ui, DrizzleUiWeb.Endpoint,
+config :drizzle, DrizzleWeb.Endpoint,
   url: [host: "drizzle.local", port: 80],
   http: [ip: {0, 0, 0, 0}, port: 80]
 

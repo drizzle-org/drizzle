@@ -13,6 +13,7 @@ defmodule Drizzle.MixProject do
       target: @target,
       archives: [nerves_bootstrap: "~> 1.6"],
       build_embedded: true,
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -51,8 +52,8 @@ defmodule Drizzle.MixProject do
   defp aliases do
     [
       loadconfig: [&bootstrap/1],
-      setup: ["deps.get", "cmd npm install --prefix drizzle_ui/assets"],
-      assets: ["cmd npm run deploy --prefix drizzle_ui/assets"],
+      setup: ["deps.get", "cmd npm install --prefix assets"],
+      assets: ["cmd npm run deploy --prefix assets"],
       firmware: ["assets", "firmware"]
     ]
   end
@@ -66,12 +67,25 @@ defmodule Drizzle.MixProject do
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
       #{:drizzle_ui, path: "drizzle_ui", runtime: false},
-      {:drizzle_ui, path: "drizzle_ui"},
+      # {:drizzle_ui, path: "drizzle_ui"},
       {:nerves, "~> 1.6", runtime: false},
       {:shoehorn, "~> 0.6"},
       {:toolshed, "~> 0.2"},
       {:vintage_net, "~> 0.7.9"},
       {:vintage_net_wizard, "~> 0.2.3"},
+
+      # UI Dependencies
+      {:phoenix, "~> 1.5.1"},
+      {:phoenix_ecto, "~> 4.1"},
+      {:phoenix_live_view, "~> 0.13"},
+      {:floki, ">= 0.0.0", only: :test},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix_live_dashboard, "~> 0.2"},
+      {:telemetry_metrics, "~> 0.4"},
+      {:telemetry_poller, "~> 0.4"},
+      {:gettext, "~> 0.11"},
+      {:plug_cowboy, "~> 2.0"},
 
       # Dependencies for all targets except :host
       {:nerves_time, "~> 0.2", targets: @all_targets},

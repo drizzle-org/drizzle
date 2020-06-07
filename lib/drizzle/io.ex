@@ -52,7 +52,7 @@ defmodule Drizzle.IO do
   defp intstate(_state), do: 1
 
   defp do_status_change(zone_name, zonestruct, desiredstate) do
-    DrizzleUiWeb.Endpoint.broadcast(@topic, "zone status change", %{
+    DrizzleWeb.Endpoint.broadcast(@topic, "zone status change", %{
       zone: zone_name,
       newstate: desiredstate
     })

@@ -23,7 +23,10 @@ defmodule Drizzle.Application do
           {Drizzle.IO, []},
           {Drizzle.Scheduler, %{}},
           {Drizzle.Forecaster, %{}},
-          {Drizzle.TodaysEvents, []}
+          {Drizzle.TodaysEvents, []},
+          DrizzleWeb.Telemetry,
+          {Phoenix.PubSub, [name: :drizzle_pubsub, adapter: Phoenix.PubSub.PG2]},
+          DrizzleWeb.Endpoint
         ],
       opts
     )
