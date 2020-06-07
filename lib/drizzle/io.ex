@@ -52,7 +52,11 @@ defmodule Drizzle.IO do
   defp intstate(_state), do: 1
 
   defp do_status_change(zone_name, zonestruct, desiredstate) do
-    DrizzleUiWeb.Endpoint.broadcast @topic, "zone status change", %{zone: zone_name, newstate: desiredstate}
+    DrizzleUiWeb.Endpoint.broadcast(@topic, "zone status change", %{
+      zone: zone_name,
+      newstate: desiredstate
+    })
+
     # GPIO.write(0) actually turns ON the relay on the Waveshare RPi 8x relay board
     # this has to do with pull-up or down resitors, we might need to make this configurable
     :ok = Circuits.GPIO.write(zonestruct.gpio, intstate(!desiredstate))
@@ -86,5 +90,4 @@ defmodule Drizzle.IO do
   def handle_call(:zonestate, _from, state) do
     {:reply, state, state}
   end
-
 end

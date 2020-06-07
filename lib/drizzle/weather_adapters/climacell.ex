@@ -4,14 +4,9 @@ defmodule Drizzle.WeatherAdapter.ClimaCell do
   """
   @behaviour Drizzle.WeatherAdapter
 
-  alias Drizzle.HTTP
+  alias Drizzle.{HTTP, Settings}
 
   @api_key Application.get_env(:drizzle, :climacell_api_key)
-  @forecast_location Application.get_env(:drizzle, :location, %{
-                       latitude: 0,
-                       longitude: 0
-                     })
-  @temp_units Application.get_env(:drizzle, :temp_units, :f)
 
   def forecast do
     build_url()
@@ -20,8 +15,6 @@ defmodule Drizzle.WeatherAdapter.ClimaCell do
   end
 
   defp api_key, do: @api_key
-  defp latitude, do: @forecast_location.latitude
-  defp longitude, do: @forecast_location.longitude
   defp fields, do: "temp,wind_speed,precipitation,precipitation_probability"
   defp start_time, do: "now"
 
@@ -34,7 +27,7 @@ defmodule Drizzle.WeatherAdapter.ClimaCell do
   end
 
   defp temp_units do
-    case @temp_units do
+    case Settings.temp_units() do
       units when units in [:f, :us, :farenheit] -> "us"
       _ -> "si"
     end
@@ -42,8 +35,8 @@ defmodule Drizzle.WeatherAdapter.ClimaCell do
 
   defp build_url do
     "https://api.climacell.co/v3/weather/forecast/hourly" <>
-      "?lat=#{latitude()}" <>
-      "&lon=#{longitude()}" <>
+      "?lat=#{Settings.latitude()}" <>
+      "&lon=#{Settings.longitude()}" <>
       "&unit_system=#{temp_units()}" <>
       "&start_time=#{start_time()}" <>
       "&end_time=#{end_time()}" <>

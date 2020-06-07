@@ -1,5 +1,5 @@
 defmodule Drizzle.TodaysEvents do
-  @available_watering_times Application.get_env(:drizzle, :available_watering_times, %{})
+  alias Drizzle.Settings
 
   def child_spec(opts) do
     %{
@@ -38,7 +38,7 @@ defmodule Drizzle.TodaysEvents do
 
   defp reduce_event_groups(key, list) do
     factor = Drizzle.Weather.weather_adjustment_factor()
-    {start_time, _stop_time} = Map.get(@available_watering_times, key)
+    {start_time, _stop_time} = Map.get(Settings.available_watering_times(), key)
 
     Enum.reduce(list, %{last_time: start_time, events: []}, fn {zone, _grp, duration}, acc ->
       new_start_event = {acc[:last_time], :on, zone}

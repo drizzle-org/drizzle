@@ -13,17 +13,21 @@ defmodule Drizzle.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Drizzle.Supervisor]
 
-    Supervisor.start_link(children(@target) ++ [
-      {Finch, name: DrizzleHTTP},
-      Drizzle.Schedule,
-      {Drizzle.WeatherData, []},
-      {Drizzle.IO, []},
-      {Drizzle.Scheduler, %{}},
-      {Drizzle.Forecaster, %{}},
-      {Drizzle.TodaysEvents, []}
-    ], opts)
+    Supervisor.start_link(
+      children(@target) ++
+        [
+          {Finch, name: DrizzleHTTP},
+          Drizzle.Settings,
+          Drizzle.Schedule,
+          {Drizzle.WeatherData, []},
+          {Drizzle.IO, []},
+          {Drizzle.Scheduler, %{}},
+          {Drizzle.Forecaster, %{}},
+          {Drizzle.TodaysEvents, []}
+        ],
+      opts
+    )
   end
-
 
   def children(:host) do
     # children to run ONLY at the host for testing. Please try to keep this empty
@@ -36,15 +40,15 @@ defmodule Drizzle.Application do
   end
 
   defp prepare_network do
-    IO.puts "===> prepare_network <==="
+    IO.puts("===> prepare_network <===")
+
     if "wlan0" in VintageNet.all_interfaces() do
+      # start the WiFi wizard if the wireless interface is not configured
+      if "wlan0" not in VintageNet.configured_interfaces() do
         # start the WiFi wizard if the wireless interface is not configured
-        if "wlan0" not in VintageNet.configured_interfaces() do
-          # start the WiFi wizard if the wireless interface is not configured
-          IO.puts "===> Running VintageNetWizard <==="
-          VintageNetWizard.run_wizard()
-        end
+        IO.puts("===> Running VintageNetWizard <===")
+        VintageNetWizard.run_wizard()
+      end
     end
   end
-
 end

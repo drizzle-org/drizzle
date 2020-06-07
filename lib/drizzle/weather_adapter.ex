@@ -3,7 +3,8 @@ defmodule Drizzle.WeatherAdapter do
   @type precipitation :: number()
   @type precipitation_probability :: number()
   @type wind_speed :: number()
-  @type forecast_data :: {temperature(), precipitation(), precipitation_probability(), wind_speed()}
+  @type forecast_data ::
+          {temperature(), precipitation(), precipitation_probability(), wind_speed()}
 
   @doc """
   Fetch the forecast as a list of hourly reports.

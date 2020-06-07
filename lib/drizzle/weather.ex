@@ -3,8 +3,8 @@ defmodule Drizzle.Weather do
   This module handles getting the weather forecast.
   """
 
-  @winter_months Application.get_env(:drizzle, :winter_months, [])
-  @temp_units Application.get_env(:drizzle, :temp_units, :f)
+  alias Drizzle.Settings
+
   @soil_moisture_sensor Application.get_env(:drizzle, :soil_moisture_sensor, nil)
   @default_adapter Drizzle.WeatherAdapter.ClimaCell
 
@@ -14,7 +14,7 @@ defmodule Drizzle.Weather do
   """
   @spec weather_adjustment_factor() :: float() | {:error, String.t()}
   def weather_adjustment_factor do
-    if month_as_atom(DateTime.utc_now().month) in @winter_months do
+    if month_as_atom(DateTime.utc_now().month) in Settings.winter_months() do
       0
     else
       {low, high, precipitation} =
@@ -119,14 +119,14 @@ defmodule Drizzle.Weather do
   end
 
   defp low_temp do
-    case @temp_units do
+    case Settings.temp_units() do
       :f -> 32
       :c -> 0
     end
   end
 
   defp high_temp do
-    case @temp_units do
+    case Settings.temp_units() do
       :f -> 90
       :c -> 32
     end
