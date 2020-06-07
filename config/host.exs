@@ -21,6 +21,8 @@ config :vintage_net,
   persistence: VintageNet.Persistence.Null,
   bin_ip: "false"
 
-  config :drizzle,
-    # gpio_module: Drizzle.GPIO
-    schedule_dir: Path.expand(Path.join(__DIR__, "../tmp"))
+config :drizzle,
+  # gpio_module: Drizzle.GPIO
+  database_dir: Path.expand(Path.join(__DIR__, "../tmp"))
+
+import_config("../drizzle_ui/config/#{Mix.env()}.exs")
