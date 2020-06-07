@@ -6,12 +6,16 @@ defmodule Drizzle.Schedule do
   @day_keys [:sun, :mon, :tue, :wed, :thu, :fri, :sat]
 
   def child_spec(_arg) do
-    dir = Application.get_env(:drizzle, :schedule_dir, "/root/schedule_db")
+    dir =
+      Application.get_env(:drizzle, :database_dir, "/root")
+      |> Path.join("schedules")
+
     %{id: __MODULE__, start: {CubDB, :start_link, [[data_dir: dir, name: __MODULE__]]}}
   end
 
-  defdelegate get(db \\ __MODULE__, day), to: CubDB
   defdelegate size(db \\ __MODULE__), to: CubDB
+
+  def get(day), do: CubDB.get(__MODULE__, day, [])
 
   @spec set(day(), zone() | [zone()]) :: :ok | {:invalid_day, day} | {:invalid_zones, [any()]}
   def set(day, _zones) when day not in @day_keys, do: {:invalid_day, day}

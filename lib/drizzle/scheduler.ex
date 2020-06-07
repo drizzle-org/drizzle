@@ -1,10 +1,9 @@
 defmodule Drizzle.Scheduler do
   use GenServer
 
-  alias Drizzle.{Schedule, TodaysEvents}
+  alias Drizzle.{Schedule, Settings, TodaysEvents}
 
   @days_as_atoms {:zero, :sun, :mon, :tue, :wed, :thu, :fri, :sat}
-  @utc_offset Application.get_env(:drizzle, :utc_offset, 0)
 
   def start_link(_args) do
     GenServer.start_link(__MODULE__, %{})
@@ -40,7 +39,7 @@ defmodule Drizzle.Scheduler do
     time =
       DateTime.utc_now()
       |> DateTime.to_time()
-      |> Time.add(60 * 60 * @utc_offset)
+      |> Time.add(60 * 60 * Settings.utc_offset())
 
     time.hour * 100 + time.minute
   end
@@ -70,7 +69,7 @@ defmodule Drizzle.Scheduler do
   defp adjust_for_utc_offset(day_of_week) do
     utc_time = DateTime.utc_now() |> DateTime.to_time()
 
-    case utc_time.hour + @utc_offset do
+    case utc_time.hour + Settings.utc_offset() do
       time when time < 0 -> -1
       time when time >= 24 -> 1
       _ -> 0

@@ -14,7 +14,7 @@ defmodule Drizzle.MixProject do
       archives: [nerves_bootstrap: "~> 1.6"],
       build_embedded: true,
       start_permanent: Mix.env() == :prod,
-      aliases: [loadconfig: [&bootstrap/1]],
+      aliases: aliases(),
       deps: deps(),
       releases: [{@app, release()}],
       preferred_cli_target: [run: :host, test: :host]
@@ -48,11 +48,21 @@ defmodule Drizzle.MixProject do
     ]
   end
 
+  defp aliases do
+    [
+      loadconfig: [&bootstrap/1],
+      setup: ["deps.get", "cmd npm install --prefix drizzle_ui/assets"],
+      assets: ["cmd npm run deploy --prefix drizzle_ui/assets"],
+      firmware: ["assets", "firmware"]
+    ]
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:circuits_gpio, "~> 0.1"},
       {:cubdb, "~> 1.0.0-rc.3"},
+      {:ecto, "~> 3.0"},
       {:finch, "~> 0.2.0"},
       {:jason, "~> 1.2.1"},
       #{:drizzle_ui, path: "drizzle_ui", runtime: false},
