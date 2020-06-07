@@ -61,6 +61,7 @@ defmodule Drizzle.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+
       {:circuits_gpio, "~> 0.1"},
       {:cubdb, "~> 1.0.0-rc.3"},
       {:ecto, "~> 3.0"},
@@ -70,6 +71,8 @@ defmodule Drizzle.MixProject do
       # {:drizzle_ui, path: "drizzle_ui"},
       {:nerves, "~> 1.6", runtime: false},
       {:shoehorn, "~> 0.6"},
+      {:solarex,  "~> 0.1.2"},
+      {:sched_ex, "~> 1.1.1"},
       {:toolshed, "~> 0.2"},
       {:vintage_net, "~> 0.7.9"},
       {:vintage_net_wizard, "~> 0.2.3"},
