@@ -61,7 +61,6 @@ defmodule Drizzle.IO do
       zone: zone_name,
       newstate: desiredstate
     })
-
     # GPIO.write(0) actually turns ON the relay on the Waveshare RPi 8x relay board
     # this has to do with pull-up or down resitors, we might need to make this configurable
     :ok = Circuits.GPIO.write(zonestruct.gpio, intstate(!desiredstate))

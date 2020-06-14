@@ -7,7 +7,7 @@ defmodule DrizzleWeb.PageLive do
   def mount(_params, _session, socket) do
     DrizzleWeb.Endpoint.subscribe(@pubsub_topic)
     zones = Drizzle.IO.zonestate()
-    {:ok, assign(socket, query: "", results: %{}, zones: zones)}
+    {:ok, assign(socket, query: "", results: %{}, schedule: Drizzle.Scheduler.explain_schedule(), zones: zones)}
   end
 
   @impl true
@@ -26,4 +26,9 @@ defmodule DrizzleWeb.PageLive do
     newzones = put_in(socket.assigns.zones, [zoneinfo.zone, :currstate], zoneinfo.newstate)
     {:noreply, socket |> assign(:zones, newzones)}
   end
+
+  def handle_info(%{event: "schedule refreshed", payload: newschedule}, socket) do
+    {:noreply, socket |> assign(:schedule, newschedule)}
+  end
+
 end

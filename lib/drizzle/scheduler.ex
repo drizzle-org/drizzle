@@ -1,7 +1,8 @@
 defmodule Drizzle.Scheduler do
   use GenServer
-
   alias Drizzle.Settings
+
+  @topic "drizzle"
 
   def default_config(), do: %{
     #        duration        variance   frequency                   trigger_clause
@@ -33,16 +34,20 @@ defmodule Drizzle.Scheduler do
 
   @doc "returns the current schedule, including next occurences for chained zones"
   def explain_schedule() do
-    sch = GenServer.call(DrizzleScheduler, :get_schedule)
+    GenServer.call(DrizzleScheduler, :get_schedule) |> schedule_explained()
+  end
+
+  defp schedule_explained(sch) do
     sch |> Enum.map(fn {zone, zinfo} -> {zone,
       duration_seconds: round(zinfo.dur/1000),
       next_occurrence:  zone_next_occurrence(sch, zone)
     } end)
+    |> Enum.into(%{})
   end
 
   def zone_next_occurrence(sch, zone) when is_map_key(zone, :hour), do: Access.get(sch[zone], :next) || Timex.now()
   def zone_next_occurrence(sch, zone) do
-    IO.puts "explain_zone #{inspect zone}"
+    #IO.puts "explain_zone #{inspect zone}"
     Access.get(sch[zone], :next) || Timex.add(
       zone_next_occurrence(sch, sch[zone].trig),
       Timex.Duration.from_milliseconds(sch[zone].dur)
@@ -72,14 +77,13 @@ defmodule Drizzle.Scheduler do
   end
 
   def generate_schedule(state) do
-    state
-    |> Map.merge(%{schedule:
-      state.schedule
+    newschedule = state.schedule
       |> Enum.map(fn {zone, zoneinfo} ->
-            if !is_map_key(zoneinfo, :next), do: zone_schedule(state, zone), else: {zone, zoneinfo}
-        end)
+          if !is_map_key(zoneinfo, :next), do: zone_schedule(state, zone), else: {zone, zoneinfo}
+      end)
       |> Enum.into(%{})
-    })
+    DrizzleWeb.Endpoint.broadcast(@topic, "schedule refreshed", schedule_explained(newschedule))
+    state |> Map.merge(%{schedule: newschedule})
   end
 
   @doc "given the schedule_config stored in state, produce a throw-away schedule for today's events"
@@ -94,7 +98,7 @@ defmodule Drizzle.Scheduler do
     zoneinfo = state |> get_in([:schedule, zone])
     {duration, variance, frequency, trigger_clause} = state |> get_in([:schedule_config, zone])
     #factor = Drizzle.Weather.weather_adjustment_factor() |>IO.inspect(label: "factor")
-    factor = 0.2
+    factor = 0.5
     dur_millis = duration
       |> parse_duration()
       |> apply_variance(variance, factor)

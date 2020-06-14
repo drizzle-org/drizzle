@@ -12,13 +12,25 @@
   </ul>
 
   <h2>Irrigation schedule:</h2>
-  <!-- TODO: add moment.js to format these in the browsers timezone -->
-  <ul>
-  <%= for {zonename, zonesched} <- Drizzle.Scheduler.explain_schedule() do %>
-    <li>
-    <%= zonename %>:
-    <%= inspect zonesched %>
-    </li>
-  <% end %>
-  </ul>
+  <script type='text/javascript'>
+    let convert_dates = function() {
+      JQuery(".utc_to_local").text(function(index, utc_date) {
+        when = moment.utc(utc_date).local();
+        return when.format('YYYY-DD-MM HH:mm:ss') + " (" + when.from() + ")";
+      });
+    };
+    document.addEventListener('phx:update', convert_dates);
+  </script>
+  <table>
+    <thead>
+      <td>Zone</td> <td>Duration</td> <td>Next occurrence</td>
+    </thead>
+    <%= for {zonename, zonesched} <- assigns.schedule do %>
+      <tr>
+        <td id="<%= zonename %>-label"><%= zonename %>:</td>
+        <td id="<%= zonename %>-duration" class="zoneDuration"><%= zonesched |> Keyword.get(:duration_seconds) %> sec</td>
+        <td id="<%= zonename %>-occurrence" class="utc_to_local"><%= zonesched |> Keyword.get(:next_occurrence) |> DateTime.to_iso8601() %></td>
+      </tr>
+    <% end %>
+  </table>
 </section>
