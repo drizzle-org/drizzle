@@ -62,7 +62,7 @@ iex(1)>
 (Work in progress) Drizzle has its own user interface based on Phoenix. Once you get the network setup complete, you should be able to navigate to 
 http://drizzle.local and get a basic web page that allows you to:
 - Manually control the zones
-- View a list of today's scheduled irrigation events
+- View a list of the next scheduled irrigation events for each zone
 
 Things on the backlog for the UI are currently:
 - Dynamic schedule (change your watering schedule via the UI)
@@ -88,15 +88,15 @@ $ ./upload.sh drizzle.local ./_build/rpi3/rpi3_dev/nerves/images/drizzle.fw
 
 - Starts the weather data agent, which stores state for the previous 12 hours and next 24 hours of weather. Until the system has been online for 12 hours, your previous 12 hours will not be set.
 - Registers each of your zones with a corresponding GPIO pin on your device.
-- Initializes a schedule of todays events. (This will happen at midnight each day or whenever the schedule for today is empty.) This means starting up a genserver and loading it with the schedule from your config file.
 - Starts a recurring genserver that checks the weather each hour and updates the weather data agent.
-- Each minute the scheduler checks if there is a scheduled event for the current time. Events are either to activate or deactivate a zone. If an event is scheduled, the GPIO sends the correct signal to the relay board to fulfill the request.  
+- The scheduler generates or updates the schedule from its own config when:
+  * the system starts up
+  * a zone (or a series of chained zones) finishes irrigation
+  * by a PubSub event
 
 ## Scheduler
 
-```
-  
-```
+Drizzle comes bundled with a powerful scheduler that is driven off astronomical events (like sunrise/noon/sunset/midnight). This allows time calculations to be entirely based on UTC, as long as you've set up your coordinates correctly. You can define individual triggers per zone, or you can 'chain' several zones to activate one after the other. Please see the `Drizzle.Scheduler` module documentation for more details.  
 
 ## Targets
 

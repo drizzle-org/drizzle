@@ -1,4 +1,35 @@
 defmodule Drizzle.Scheduler do
+@moduledoc """
+  Implements an advanced irrigation schedule controller for Drizzle.
+  Terminology:
+
+  - `schedule_config`: the human-readable, WebUI driven configuration that drives the schedule.
+    It contains only tuples with atoms and integers, for basically 4 clauses:
+    * `duration` - base time for the zone, eg. `{10, :minutes}`
+    * `variance` - should the base time vary with weather conditions or be a fixed value (:fixed/:variable)
+    * `frequency` - how often should the zone be irrigated, eg `{:every, 2, :days}` or `{:on, [:mon, :fri]}`
+    * `trigger` - what trigggers the zone, either an astronomical event like sunset, or simply another zone.
+      The triggers are quite powerful that are themselves broken down in 1)offset 2)before/after and 3)exactly/on.
+      You can use `sunrise/noon/sunset` and `midnight`. These are *astronomical* times and are calculated
+      based on your longitute/latitude. Expect them to vary from your wall clock!
+
+      Some examples:
+
+      * `{{3, :hours}, :before, :sunrise}}` - start the zone three hours before sunrise
+      * `{:chain,      :after,  :zone2}}` - start the zone after zone2 has finished
+      * `{:exactly,    :at,     :noon}}`  - start the zone at solar noon
+
+  - `schedule`: a dynamic volatile struct that applies the config onto concrete datetimes for the zone trigger events.
+    The schedule only contains timers and next_occurrence timestamps for zones that are triggered by *time triggers*
+    It does **not** define next_occurrence dates and timers for chained zones.
+
+  - For display purposes you might want to use `explain_schedule/0`, which will derive each zone's actual scheduled occurrence
+    by working out all zones, (including chained zones) duration + the initiating zone start time.
+
+  - All datetimes are stored in `UTC` internally and need to be converted to the user's locale for diplay purposes
+
+"""
+
   use GenServer
   alias Drizzle.Settings
 
@@ -37,6 +68,8 @@ defmodule Drizzle.Scheduler do
     GenServer.call(DrizzleScheduler, :get_schedule) |> schedule_explained()
   end
 
+  # get a schedule explanation, meaning it has populated all zones expected next occurrences
+  # including chained zones (which dont have their own trigger event), but rely on another zone's finished event
   defp schedule_explained(sch) do
     sch |> Enum.map(fn {zone, zinfo} -> {zone,
       duration_seconds: round(zinfo.dur/1000),
@@ -45,17 +78,18 @@ defmodule Drizzle.Scheduler do
     |> Enum.into(%{})
   end
 
+  @doc "recursively work out a zone's next occurrence by adding up all chained zones durations"
   def zone_next_occurrence(sch, zone) when is_map_key(zone, :hour), do: Access.get(sch[zone], :next) || Timex.now()
   def zone_next_occurrence(sch, zone) do
-    #IO.puts "explain_zone #{inspect zone}"
     Access.get(sch[zone], :next) || Timex.add(
       zone_next_occurrence(sch, sch[zone].trig),
       Timex.Duration.from_milliseconds(sch[zone].dur)
     )
   end
 
-  @doc "recalculate sunrise and sunset every midnight"
+  @doc "pubsub event handler for UI scheduler config changes"
   def handle_cast(:scheduler_config_changed, state), do: {:noreply, generate_schedule(state)}
+  @doc "sync call to retrieve the current schedule"
   def handle_call(:get_schedule, _from, state), do: {:reply, state.schedule, state}
   @doc "Drizzle.IO callback to inform the schedule that a zone has finished irrigating"
   def handle_info({:zone_finished, zone}, state) do
@@ -76,6 +110,7 @@ defmodule Drizzle.Scheduler do
     }
   end
 
+  @doc "generate the schedule for all zones that need an updated next_occurrence"
   def generate_schedule(state) do
     newschedule = state.schedule
       |> Enum.map(fn {zone, zoneinfo} ->
