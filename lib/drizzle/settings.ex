@@ -13,7 +13,7 @@ defmodule Drizzle.Settings do
 
   @primary_key false
 
-  alias Drizzle.Types.{Month, TempUnits, WateringTime}
+  alias Drizzle.Types.{Month, TempUnits, SchedulerConfig, WateringTime}
 
   embedded_schema do
     field(:latitude)
@@ -23,6 +23,7 @@ defmodule Drizzle.Settings do
     field(:morning, WateringTime, default: {300, 600})
     field(:evening, WateringTime, default: {2100, 2300})
     field(:temp_units, TempUnits, default: :f)
+    field(:scheduler_config, SchedulerConfig, default: Drizzle.Scheduler.default_config())
   end
 
   # Create getter functions for each settings field

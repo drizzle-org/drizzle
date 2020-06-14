@@ -1,11 +1,12 @@
 defmodule Drizzle.Scheduler do
   use GenServer
 
-  @schedule_config %{
+  alias Drizzle.Settings
+
+  def default_config(), do: %{
     #        duration        variance   frequency                   trigger_clause
     #                                                        offset      after/before  condition
     zone1: {{5,  :minutes}, :fixed,    {:every, 2, :days}, {{3, :hours},   :before, :sunrise}},
-    #zone2: {{20, :minutes}, :variable, {:every, 2, :days}, {{3.5, :hours}, :after,  :midnight}},
     zone2: {{10, :seconds}, :variable, {:every, 1, :days}, {{3, :seconds}, :after,  :now}},
     zone3: {{10, :seconds}, :variable, {},                 {:chain,        :after,  :zone2}},
     zone4: {{10, :seconds}, :variable, {},                 {:chain,        :after,  :zone3}},
@@ -14,13 +15,17 @@ defmodule Drizzle.Scheduler do
     zone7: {{20, :minutes}, :variable, {:every, 3, :days}, {:exactly,      :at,     :noon}},
     zone8: {{10, :minutes}, :fixed,    {:on, [:mon, :fri]}, {{30, :minutes}, :after, :sunset}}
   }
+  @type duration_units :: :seconds | :minutes
 
   @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
-
   def start_link(_args) do
     GenServer.start_link(__MODULE__, %{
-      astro: Application.get_env(:drizzle, :location) |> Map.new(fn {k, v} -> {k, String.to_float(v)} end),
-      schedule_config: @schedule_config},
+      astro: %{
+        latitude:  Settings.latitude() || (System.get_env("LATITUDE", "37.983810") |> String.to_float),
+        longitude: Settings.longitude()|| (System.get_env("LONGITUDE", "23.727539") |> String.to_float)
+      },
+      schedule_config: Settings.scheduler_config() || default_config()
+    },
     name: DrizzleScheduler)
   end
 
@@ -30,13 +35,18 @@ defmodule Drizzle.Scheduler do
   def explain_schedule() do
     sch = GenServer.call(DrizzleScheduler, :get_schedule)
     sch |> Enum.map(fn {zone, zinfo} -> {zone,
-      duration_seconds: round(sch[zone].dur/1000),
-      next_occurrence: explain_zone(sch, zone)
+      duration_seconds: round(zinfo.dur/1000),
+      next_occurrence:  zone_next_occurrence(sch, zone)
     } end)
   end
 
-  def explain_zone(sch, zone) do
-    sch[zone].next || Timex.add(explain_zone(sch, sch[zone].trig), Timex.Duration.from_milliseconds(sch[zone].dur))
+  def zone_next_occurrence(sch, zone) when is_map_key(zone, :hour), do: Access.get(sch[zone], :next) || Timex.now()
+  def zone_next_occurrence(sch, zone) do
+    IO.puts "explain_zone #{inspect zone}"
+    Access.get(sch[zone], :next) || Timex.add(
+      zone_next_occurrence(sch, sch[zone].trig),
+      Timex.Duration.from_milliseconds(sch[zone].dur)
+    )
   end
 
   @doc "recalculate sunrise and sunset every midnight"
@@ -79,12 +89,12 @@ defmodule Drizzle.Scheduler do
     |> Enum.into(%{})
   end
 
-  @doc "get an individual zone's schedule"
+  # get an specific zone's schedule
   defp zone_schedule(state, zone) do
     zoneinfo = state |> get_in([:schedule, zone])
     {duration, variance, frequency, trigger_clause} = state |> get_in([:schedule_config, zone])
     #factor = Drizzle.Weather.weather_adjustment_factor() |>IO.inspect(label: "factor")
-    factor = 0.1
+    factor = 0.2
     dur_millis = duration
       |> parse_duration()
       |> apply_variance(variance, factor)

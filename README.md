@@ -92,6 +92,12 @@ $ ./upload.sh drizzle.local ./_build/rpi3/rpi3_dev/nerves/images/drizzle.fw
 - Starts a recurring genserver that checks the weather each hour and updates the weather data agent.
 - Each minute the scheduler checks if there is a scheduled event for the current time. Events are either to activate or deactivate a zone. If an event is scheduled, the GPIO sends the correct signal to the relay board to fulfill the request.  
 
+## Scheduler
+
+```
+  
+```
+
 ## Targets
 
 Nerves applications produce images for hardware targets based on the

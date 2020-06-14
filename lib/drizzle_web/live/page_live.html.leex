@@ -11,7 +11,14 @@
     <% end %>
   </ul>
 
-  <h2>Todays events:</h2>
-    <%= inspect Drizzle.TodaysEvents.current_state %>
-
+  <h2>Irrigation schedule:</h2>
+  <!-- TODO: add moment.js to format these in the browsers timezone -->
+  <ul>
+  <%= for {zonename, zonesched} <- Drizzle.Scheduler.explain_schedule() do %>
+    <li>
+    <%= zonename %>:
+    <%= inspect zonesched %>
+    </li>
+  <% end %>
+  </ul>
 </section>

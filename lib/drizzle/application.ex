@@ -18,12 +18,10 @@ defmodule Drizzle.Application do
         [
           {Finch, name: DrizzleHTTP},
           Drizzle.Settings,
-          Drizzle.Schedule,
           {Drizzle.WeatherData, []},
           {Drizzle.IO, []},
-          {Drizzle.Scheduler, %{}},
           {Drizzle.Forecaster, %{}},
-          {Drizzle.TodaysEvents, []},
+          {Drizzle.Scheduler, %{}},
           DrizzleWeb.Telemetry,
           {Phoenix.PubSub, [name: :drizzle_pubsub, adapter: Phoenix.PubSub.PG2]},
           DrizzleWeb.Endpoint
