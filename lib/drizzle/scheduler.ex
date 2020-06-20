@@ -36,8 +36,8 @@ defmodule Drizzle.Scheduler do
   @topic "drizzle"
 
   def default_config(), do: %{
-    #        duration        variance   frequency                   trigger_clause
-    #                                                        offset      after/before  condition
+    #        duration        variance    frequency          trigger_clause
+    #                                    base  val  unit    offset      after/before  condition
     zone1: {{5,  :minutes}, :fixed,    {:every, 2, :days}, {{3, :hours},   :before, :sunrise}},
     zone2: {{10, :seconds}, :variable, {:every, 1, :days}, {{3, :seconds}, :after,  :now}},
     zone3: {{10, :seconds}, :variable, {},                 {:chain,        :after,  :zone2}},
@@ -62,7 +62,9 @@ defmodule Drizzle.Scheduler do
   end
 
   def init(initstate), do: {:ok, Map.merge(initstate, %{schedule: todays_tasks(initstate)})}
-
+  def get_schedule_config() do
+    GenServer.call(DrizzleScheduler, :get_schedule_config)
+  end
   @doc "returns the current schedule, including next occurences for chained zones"
   def explain_schedule() do
     GenServer.call(DrizzleScheduler, :get_schedule) |> schedule_explained()
@@ -89,6 +91,8 @@ defmodule Drizzle.Scheduler do
 
   @doc "pubsub event handler for UI scheduler config changes"
   def handle_cast(:scheduler_config_changed, state), do: {:noreply, generate_schedule(state)}
+  @doc "sync call to retrieve the schedule configuration"
+  def handle_call(:get_schedule_config, _from, state), do: {:reply, state.schedule_config, state}
   @doc "sync call to retrieve the current schedule"
   def handle_call(:get_schedule, _from, state), do: {:reply, state.schedule, state}
   @doc "Drizzle.IO callback to inform the schedule that a zone has finished irrigating"

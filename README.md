@@ -114,7 +114,7 @@ https://hexdocs.pm/nerves/targets.html#content
 Getting Circuits.GPIO to work in stub mode is tricky, as it needs recompilation. You only need to recompile when you switch mix targets though:
 ```sh
 $ rm -rf _build/
-$ MIX_ENV="test" CIRCUITS_MIX_ENV="test" iex -S mix phx.server
+$ MIX_ENV="dev" CIRCUITS_MIX_ENV="test" iex -S mix phx.server
 ```
 
 when done with testing, clean all build artifacts, recompile and flash over the network:

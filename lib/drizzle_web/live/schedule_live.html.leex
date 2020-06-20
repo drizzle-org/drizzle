@@ -1,0 +1,25 @@
+<section class="phx-hero">
+  <h3>Cnfigure your irrigation schedule</h3>
+
+    <div class="row">
+      <div class="column column-10">Zone</div class="column">
+      <div class="column column-20">Duration</div class="column">
+      <div class="column column-10">Variance</div class="column">
+      <div class="column column-30">Frequency</div class="column">
+      <div class="column column-30">Trigger</div class="column">
+    </div>
+    <form phx-change="schedule_config">
+    <%= for {zonename, {duration, variance, frequency, trigger}} <- @schedule_config do %>
+    <div class="row">
+        <div class="column column-10" id="<%= zonename %>-label"><%= zonename %>:</div class="column">
+        <div class="column column-20" ><%= render_duration(assigns, duration) %></div class="column">
+        <div class="column column-10"><%= render_variance(assigns, variance) %></div class="column">
+        <div class="column column-30"><%= render_frequency(assigns, frequency) %></div class="column">
+        <div class="column column-30"><%= render_trigger(assigns, trigger) %></div class="column">
+    </div>
+    <% end %>
+    </form>
+
+</section>
+
+

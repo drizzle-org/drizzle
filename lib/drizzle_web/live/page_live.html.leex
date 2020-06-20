@@ -3,7 +3,7 @@
   <ul>
     <%= for {zonename, zonedata} <- @zones do %>
       <%  btnCmd = if(zonedata.currstate, do: "Deactivate", else: "Activate") %>
-      <button
+      <button class="<%= if(zonedata.currstate, do: "button-black", else: "button-outline")%>"
         phx-click="manual zone control"
         phx-value-cmd="<%= String.downcase(btnCmd) %>"
         phx-value-zone="<%= zonename %>"

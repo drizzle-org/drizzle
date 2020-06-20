@@ -19,6 +19,7 @@ defmodule DrizzleWeb.Router do
 
     live "/", PageLive, :index
     live "/settings", PageLive, :settings
+    live "/schedule", ScheduleLive, :index
   end
 
   # Other scopes may use custom stacks.
