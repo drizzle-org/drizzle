@@ -9,6 +9,9 @@ defmodule Drizzle.Application do
 
   def start(_type, _args) do
     prepare_network()
+
+    wifi_gpio_pin = Application.get_env(:vintage_net_wizard, :gpio_pin, 2)
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Drizzle.Supervisor]
@@ -24,6 +27,7 @@ defmodule Drizzle.Application do
           {Drizzle.Scheduler, %{}},
           {Drizzle.Forecaster, %{}},
           {Drizzle.TodaysEvents, []},
+          {Drizzle.WifiWizardButton, wifi_gpio_pin}
           DrizzleWeb.Telemetry,
           {Phoenix.PubSub, [name: :drizzle_pubsub, adapter: Phoenix.PubSub.PG2]},
           DrizzleWeb.Endpoint
